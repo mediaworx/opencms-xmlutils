@@ -280,12 +280,9 @@ public class XmlHelper {
 
 			if (nodeType == Node.ELEMENT_NODE || nodeType == Node.CDATA_SECTION_NODE || nodeType == Node.COMMENT_NODE) {
 				removeEmptyTextNodes = true;
-			}
-			else {
-				continue;
-			}
-			if (nodeType == Node.ELEMENT_NODE) {
-				cleanEmptyTextNodes(childNode); // recurse into subtree
+				if (nodeType == Node.ELEMENT_NODE) {
+					cleanEmptyTextNodes(childNode); // recurse into subtree
+				}
 			}
 			childNode = childNode.getNextSibling();
 		}
