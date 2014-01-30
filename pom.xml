@@ -11,10 +11,39 @@
 
 	<name>OpenCms XML Utils</name>
 	<description>Helpers for parsing and modifying XML</description>
+	<url>http://mediaworx.com</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License</name>
+			<url>http://www.gnu.org/licenses/lgpl.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>mediaworx berlin AG</name>
+		<url>http://mediaworx.com</url>
+	</organization>
+
+	<scm>
+		<connection>scm:git:http://armstrong.mediaworx.de/cgit/mwx/opencms-xmlutils.git</connection>
+		<url>http://armstrong.mediaworx.de/cgit/mwx/opencms-xmlutils/</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>widmann@mediaworx.com</id>
+			<name>Kai Widmann</name>
+			<email>widmann@mediaworx.com</email>
+			<organization>mediaworx berlin AG</organization>
+			<organizationUrl>http://mediaworx.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<dependencies>
 		<dependency>
