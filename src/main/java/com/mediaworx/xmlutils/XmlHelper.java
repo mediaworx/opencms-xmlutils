@@ -41,6 +41,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Class used to create helper objects that simplify parsing and modifying XML files. To retrieve single nodes or
@@ -104,55 +106,107 @@ public class XmlHelper {
 	/**
 	 * Parses the XML content of the file at the given path using the default encoding (UTF-8). Empty text nodes or
 	 * text noes containing whitespace only are removed.
+	 *
 	 * @param path the XML file's path
 	 * @return  the parsed XML document
 	 * @throws IOException  if there's a problem accessing the file
 	 * @throws SAXException if the file content can't be parsed
 	 */
 	public Document parseFile(String path) throws IOException, SAXException {
-		return parseFile(path, DEFAULT_ENCODING);
+		return parseFile(path, null, DEFAULT_ENCODING);
+	}
+
+	/**
+	 * Parses the XML content of the file at the given path using the default encoding (UTF-8). Empty text nodes or
+	 * text noes containing whitespace only are removed. If a replacement map is provided, each key in the map is
+	 * replaced by the corresponding value in the file's content.
+	 *
+	 * @param path the XML file's path
+	 * @param replacements Map containing replacement strings, key: string to be replaced, value: replacement string (if the map is null, no replacements are made)
+	 * @return  the parsed XML document
+	 * @throws IOException  if there's a problem accessing the file
+	 * @throws SAXException if the file content can't be parsed
+	 */
+	public Document parseFile(String path, Map<String, String> replacements) throws IOException, SAXException {
+		return parseFile(path, replacements, DEFAULT_ENCODING);
 	}
 
 	/**
 	 * Parses the XML content of the file at the given path using the given encoding. Empty text nodes or
-	 * text noes containing whitespace only are removed.
+	 * text noes containing whitespace only are removed. If a replacement map is provided, each key in the map is
+	 * replaced by the corresponding value in the file's content.
+	 *
+	 *
 	 * @param path the XML file's path
+	 * @param replacements Map containing replacement strings, key: string to be replaced, value: replacement string (if the map is null, no replacements are made)
 	 * @param encoding  the encoding to be used to parse the file (must be a valid encoding like "UTF-8")
 	 * @return  the parsed XML document
 	 * @throws IOException  if there's a problem accessing the file
 	 * @throws SAXException if the file content can't be parsed
 	 */
-	public Document parseFile(String path, String encoding) throws IOException, SAXException {
-		return parseFile(new File(path), encoding);
+	public Document parseFile(String path, Map<String, String> replacements, String encoding) throws IOException, SAXException {
+		return parseFile(new File(path), replacements, encoding);
 	}
 
 	/**
 	 * Parses the XML content of the file at the given path using the default encoding (UTF-8). Empty text nodes or
-	 * text noes containing whitespace only are removed.
+	 * text noes containing whitespace only are removed. If a replacement map is provided, each key in the map is
+	 * replaced by the corresponding value in the file's content.
+	 *
 	 * @param file the file containing the XML
+	 * @param replacements Map containing replacement strings, key: string to be replaced, value: replacement string (if the map is null, no replacements are made)
 	 * @return  the parsed XML document
 	 * @throws IOException  if there's a problem accessing the file
 	 * @throws SAXException if the file content can't be parsed
 	 */
-	public Document parseFile(File file) throws IOException, SAXException {
-		return parseFile(file, DEFAULT_ENCODING);
+	public Document parseFile(File file, Map<String, String> replacements) throws IOException, SAXException {
+		return parseFile(file, replacements, DEFAULT_ENCODING);
 	}
 
 	/**
 	 * Parses the XML content of the file at the given path using the default encoding (UTF-8). Empty text nodes or
-	 * text noes containing whitespace only are removed.
+	 * text nodes containing whitespace only are removed. If a replacement map is provided, each key in the map is
+	 * replaced by the corresponding value in the file's content.
+	 *
 	 * @param file the file containing the XML
+	 * @param replacements Map containing replacement strings, key: string to be replaced, value: replacement string (if the map is null, no replacements are made)
 	 * @param encoding  the encoding to be used to parse the file (must be a valid encoding like "UTF-8")
 	 * @return  the parsed XML document
 	 * @throws IOException  if there's a problem accessing the file
 	 * @throws SAXException if the file content can't be parsed
 	 */
-	public Document parseFile(File file, String encoding) throws IOException, SAXException {
-		InputStreamReader in = new InputStreamReader(new FileInputStream(file), encoding);
-		BufferedReader reader = new BufferedReader(in);
+	public Document parseFile(File file, Map<String, String> replacements, String encoding) throws IOException, SAXException {
+		String fileContent = readFile(file, encoding);
+
+		if (replacements != null) {
+			for (String search : replacements.keySet()) {
+				String replace = replacements.get(search);
+				fileContent = fileContent.replaceAll(Pattern.quote(search), replace);
+			}
+		}
+		StringReader reader = new StringReader(fileContent);
 		Document document = builder.parse(new InputSource(reader));
 		cleanEmptyTextNodes(document);
 		return document;
+	}
+
+	/**
+	 * Helper method to read the file's content into a String
+	 * @param file the file to be read
+	 * @param encoding  the encoding to be used to read the file (must be a valid encoding like "UTF-8")
+	 * @return String containing the file's content
+	 * @throws IOException if there's a problem accessing the file
+	 */
+	private static String readFile(File file, String encoding) throws IOException {
+		InputStreamReader in = new InputStreamReader(new FileInputStream(file), encoding);
+		BufferedReader reader = new BufferedReader(in);
+		StringBuilder fileContent = new StringBuilder();
+		String line = reader.readLine();
+        while(line != null){
+	        fileContent.append(line).append('\n');
+            line = reader.readLine();
+        }
+		return fileContent.toString();
 	}
 
 	/**
@@ -220,11 +274,12 @@ public class XmlHelper {
 	 * parses and appends the content of a file as a child node to the given parent node
 	 * @param parent            the parent node
 	 * @param newChildFilePath  the path to the file whose content is to be added as a child node
+	 * @param replacements      Map containing replacement strings, key: string to be replaced, value: replacement string
 	 * @throws IOException      if there's a problem accessing the file
 	 * @throws SAXException     if the file can't be parsed
 	 */
-	public void appendFileAsNode(Node parent, String newChildFilePath) throws IOException, SAXException {
-		Document newChild = parseFile(newChildFilePath);
+	public void appendFileAsNode(Node parent, String newChildFilePath, Map<String, String> replacements) throws IOException, SAXException {
+		Document newChild = parseFile(newChildFilePath, replacements);
 		appendNode(parent, newChild);
 	}
 
