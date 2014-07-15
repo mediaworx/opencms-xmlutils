@@ -312,8 +312,7 @@ public class XmlHelper {
 			return "";
 		}
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-		transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		if (cdataElements != null && cdataElements.length > 0) {
 			String cdataElementsJoined = StringUtils.join(cdataElements, ' ');
@@ -321,23 +320,25 @@ public class XmlHelper {
 		}
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
-		StringWriter writer = new StringWriter();
+		OutputStream out = new ByteArrayOutputStream();
 		try {
-			transformer.transform(new DOMSource(document), new StreamResult(writer));
+			transformer.transform(new DOMSource(document), new StreamResult(out));
 		}
 		catch (TransformerException e) {
 			LOG.error("Exception transforming the XML document to String", e);
 		}
 		finally {
 			try {
-				writer.close();
+				out.close();
 			}
 			catch (IOException e) {
-				// it seems the writer was closed already
-				LOG.warn("Exception closing the writer", e);
+				// it seems the output stream was closed already
+				LOG.warn("Exception closing the output stream", e);
 			}
 		}
-		return writer.getBuffer().toString();
+		StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(encoding).append("\"?>\n");
+		xml.append(out.toString());
+		return xml.toString();
 	}
 
 	/**
