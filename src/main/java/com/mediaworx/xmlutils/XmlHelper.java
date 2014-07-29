@@ -150,6 +150,19 @@ public class XmlHelper {
 
 	/**
 	 * Parses the XML content of the file at the given path using the default encoding (UTF-8). Empty text nodes or
+	 * text noes containing whitespace only are removed.
+	 *
+	 * @param file the file containing the XML
+	 * @return  the parsed XML document
+	 * @throws IOException  if there's a problem accessing the file
+	 * @throws SAXException if the file content can't be parsed
+	 */
+	public Document parseFile(File file) throws IOException, SAXException {
+		return parseFile(file, null, DEFAULT_ENCODING);
+	}
+
+	/**
+	 * Parses the XML content of the file at the given path using the default encoding (UTF-8). Empty text nodes or
 	 * text noes containing whitespace only are removed. If a replacement map is provided, each key in the map is
 	 * replaced by the corresponding value in the file's content.
 	 *
