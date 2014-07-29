@@ -42,6 +42,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -194,7 +195,7 @@ public class XmlHelper {
 		if (replacements != null) {
 			for (String search : replacements.keySet()) {
 				String replace = replacements.get(search);
-				fileContent = fileContent.replaceAll(Pattern.quote(search), replace);
+				fileContent = fileContent.replaceAll(Pattern.quote(search), Matcher.quoteReplacement(replace));
 			}
 		}
 		StringReader reader = new StringReader(fileContent);
