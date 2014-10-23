@@ -1,4 +1,5 @@
 opencms-xmlutils
 ================
 
-Some XML helper methods, used by opencms-manifestgenerator and opencms-modulepackager
+A class containing XML helper methods, used by the opencms-manifestgenerator, the opencms-modulepackager and the
+opencms-intellijplugin.
